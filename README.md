@@ -31,7 +31,7 @@ Moreover, AMSI is responsible to scan any assembly content during reflective ass
 Other encryption algorithms, such as AES or XOR, should also be applicable, since the primary purpose is to protect our payload placed on disk against EDR detection. Without bypassing techniques, the payload could still be possibily detected when decrypted and loaded into memory regions in the current process.
 
 ## CLR Hosting
-The .NET loader references to a few resoruces in the resource and credits section for me to understand and implment CLR hosting to load .NET assemblies and invoke the EntryPoint in the assembly with the user-provided arguments. Throughout reading materials, both `Load_3` and `Invoke_3` API calls require to pass a byte array (`SAFEARRAY`) as an argument.
+The .NET loader references to a few resoruces in the resource and credits section for me to understand and implement CLR hosting to load .NET assemblies and invoke the EntryPoint in the assembly with the user-provided arguments. Throughout reading materials, both `Load_3` and `Invoke_3` API calls require to pass a byte array (`SAFEARRAY`) as an argument.
 
 `Load_3`:
 
