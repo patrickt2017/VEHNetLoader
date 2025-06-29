@@ -18,6 +18,8 @@ It is worth noting that EDR or malware analyst may still detect our abnormal sys
 ## ETW Patching
 ETW providers usually call common WinAPIs such as `EtwEventWrite` and `EtwEventWriteFull` to pass the events to ETW tracing session. At the end, The Native API `NtTraceEvent` is called by these ETW functions. Hence, We could directly apply byte patching to replace its SSN to a dummy value to cause the syscall failure.
 
+![](/images/ETW-Patch.png)
+
 For ETW CLR providers, please refer to Microsoft's documentation: https://learn.microsoft.com/en-us/dotnet/framework/performance/clr-etw-providers.
 
 ## AMSI Patching
@@ -26,6 +28,8 @@ Practical Securiy Analytics LLC has discussed Microsoft's new behavior detection
 The new technique is to overwrite the string `AmsiScanBuffer` in `.rdata` section of CLR.dll with dummy values, so that it will trigger an error in `GetProcAddress` function call and CLR.dll cannot resolve the method from amsi.dll. 
 
 Moreover, AMSI is responsible to scan any assembly content during reflective assembly loads in CLR environment, hence bypassing AMSI here is critical for us to avoid being detected by AMSI and EDR. 
+
+![](/images/AMSI-Patch.png)
 
 ## RC4 Encryption
 Other encryption algorithms, such as AES or XOR, should also be applicable, since the primary purpose is to protect our payload placed on disk against EDR detection. Without bypassing techniques, the payload could still be possibily detected when decrypted and loaded into memory regions in the current process.
