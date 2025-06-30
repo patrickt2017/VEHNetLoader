@@ -669,7 +669,7 @@ int main(int argc, char* argv[]) {
 	printf("[=] Parsing arguments...\n");
 	if (HandleCmdLineArgs(argc, argv, &pe_arg, &key_arg, &parm_arg, &parm_count) != 0) {
 		printf("[-] Failed to parse arguments\n");
-		printf("[!] Rc4VEHNetLoader.exe -pe <payload> -key <key> -parm <arguments>");
+		printf("[!] VEHNetLoader.exe -pe <payload> -key <key> -parm <arguments>");
 		return -1;
 	}
 	printf("[+] .NET assembly file name: %s\n", pe_arg ? pe_arg : "NULL");
