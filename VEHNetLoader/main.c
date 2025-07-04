@@ -318,7 +318,7 @@ BOOL ReadRc4File(IN LPCSTR fileName, OUT PBYTE* ppFileBuffer, OUT PDWORD pdwFile
 
 // https://github.com/passthehashbrowns/Being-A-Good-CLR-Host
 /* Execute the.NET assembly */
-BOOL LoadDotnet(IN LPCWSTR runtimeVersion, IN PBYTE AssemblyBytes, IN ULONG AssemblySize, IN PWSTR Arguments, OUT LPSTR* OutputBuffer, OUT PULONG OutputLength) {
+HRESULT LoadDotnet(IN LPCWSTR runtimeVersion, IN PBYTE AssemblyBytes, IN ULONG AssemblySize, IN PWSTR Arguments, OUT LPSTR* OutputBuffer, OUT PULONG OutputLength) {
 	HRESULT hr;
 	ICLRMetaHost* pMetaHost = NULL;
 	ICLRRuntimeInfo* pRuntimeInfo = NULL;
@@ -470,7 +470,6 @@ BOOL LoadDotnet(IN LPCWSTR runtimeVersion, IN PBYTE AssemblyBytes, IN ULONG Asse
 	SECURITY_ATTRIBUTES SecurityAttr = { 0 };
 	HWND ConExist = NULL;
 	HWND ConHandle = NULL;
-	
 
 	SecurityAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
 	SecurityAttr.bInheritHandle = TRUE;
@@ -513,15 +512,12 @@ BOOL LoadDotnet(IN LPCWSTR runtimeVersion, IN PBYTE AssemblyBytes, IN ULONG Asse
 			printf("[-] ReadFile Failed with Error: %lx\n", GetLastError());
 			goto CLEAN_UP;
 		}
-	}
-	else {
+	} else {
 		hr = ERROR_NOT_ENOUGH_MEMORY;
 		printf("[-] OutputBuffer Allocation Failed with Error: %lx\n", hr);
 		goto CLEAN_UP;
 	}
 	printf("[+] ReadFile succeeded\n");
-
-	return TRUE;
 
 CLEAN_UP:
 	if (pRuntimeHost) {
@@ -564,7 +560,7 @@ CLEAN_UP:
 	if (IoPipeWrite)
 		CloseHandle(IoPipeWrite);
 
-	return FALSE;
+	return hr;
 }
 
 int HandleCmdLineArgs(int argc, const char* argv[], char** ppe_arg, char** pkey_arg, char** pparm_arg, int* parm_count) {
@@ -725,12 +721,11 @@ int main(int argc, char* argv[]) {
 	ULONG OutputLength = 0;
 
 	printf("[=] Laoding the .NET assembly...\n");
-	BOOL status = LoadDotnet(L"v4.0.30319", pFileBuffer, dwFileSize, arguments, &OutputBuffer, &OutputLength);
-	if (status) {
+	HRESULT status = LoadDotnet(L"v4.0.30319", pFileBuffer, dwFileSize, arguments, &OutputBuffer, &OutputLength);
+	if (SUCCEEDED(status)) {
 		printf("[+] LoadDotnet(...) succeeded\n");
 		printf("\n\n%s", OutputBuffer);
-	}
-	else
+	} else
 		printf("[!] LoadDotnet(...) failed\n");
 
 	// Remove VEH

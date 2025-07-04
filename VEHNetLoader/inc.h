@@ -4,62 +4,12 @@
 #include <Windows.h>
 #include <mscoree.h>
 #include <metahost.h>
-
 #include <stdio.h>
-
-#include <shlwapi.h>
-#pragma comment(lib, "Shlwapi.lib")
-
-static GUID xIID_IHostAssemblyStore = { 0x7b102a88, 0x3f7f, 0x496d, {0x8f, 0xa2, 0xc3, 0x53, 0x74, 0xe0, 0x1a, 0xf3} };
-static GUID xIID_IHostAssemblyManager = { 0x613dabd7, 0x62b2, 0x493e, {0x9e, 0x65, 0xc1, 0xe3, 0x2a, 0x1e, 0x0c, 0x5e} };
-
-typedef struct __TargetAssembly {
-    LPWSTR assemblyInfo;
-    unsigned char* assemblyBytes;
-    DWORD assemblySize;
-    IStream* iAssemblyStream;
-} TargetAssembly;
 
 typedef struct _AppDomain               IAppDomain;
 typedef struct _Assembly                IAssembly;
 typedef struct _Type                    IType;
-typedef struct _Binder                  IBinder;
 typedef struct _MethodInfo              IMethodInfo;
-
-#undef DUMMY_METHOD
-#define DUMMY_METHOD(x) HRESULT ( STDMETHODCALLTYPE *dummy_##x )(IBinder *This)
-
-typedef struct _BinderVtbl {
-    HRESULT(STDMETHODCALLTYPE* QueryInterface)(
-        IBinder* This,
-        /* [in] */ REFIID riid,
-        /* [iid_is][out] */ void** ppvObject);
-
-    ULONG(STDMETHODCALLTYPE* AddRef)(
-        IBinder* This);
-
-    ULONG(STDMETHODCALLTYPE* Release)(
-        IBinder* This);
-
-    DUMMY_METHOD(GetTypeInfoCount);
-    DUMMY_METHOD(GetTypeInfo);
-    DUMMY_METHOD(GetIDsOfNames);
-    DUMMY_METHOD(Invoke);
-    DUMMY_METHOD(ToString);
-    DUMMY_METHOD(Equals);
-    DUMMY_METHOD(GetHashCode);
-    DUMMY_METHOD(GetType);
-    DUMMY_METHOD(BindToMethod);
-    DUMMY_METHOD(BindToField);
-    DUMMY_METHOD(SelectMethod);
-    DUMMY_METHOD(SelectProperty);
-    DUMMY_METHOD(ChangeType);
-    DUMMY_METHOD(ReorderArgumentArray);
-} BinderVtbl;
-
-typedef struct _Binder {
-    BinderVtbl* lpVtbl;
-} Binder;
 
 #undef DUMMY_METHOD
 #define DUMMY_METHOD(x) HRESULT ( STDMETHODCALLTYPE *dummy_##x )(IAppDomain *This)
@@ -261,29 +211,6 @@ typedef struct _AssemblyVtbl {
     END_INTERFACE
 } AssemblyVtbl;
 
-typedef enum _BindingFlags {
-    BindingFlags_Default = 0,
-    BindingFlags_IgnoreCase = 1,
-    BindingFlags_DeclaredOnly = 2,
-    BindingFlags_Instance = 4,
-    BindingFlags_Static = 8,
-    BindingFlags_Public = 16,
-    BindingFlags_NonPublic = 32,
-    BindingFlags_FlattenHierarchy = 64,
-    BindingFlags_InvokeMethod = 256,
-    BindingFlags_CreateInstance = 512,
-    BindingFlags_GetField = 1024,
-    BindingFlags_SetField = 2048,
-    BindingFlags_GetProperty = 4096,
-    BindingFlags_SetProperty = 8192,
-    BindingFlags_PutDispProperty = 16384,
-    BindingFlags_PutRefDispProperty = 32768,
-    BindingFlags_ExactBinding = 65536,
-    BindingFlags_SuppressChangeType = 131072,
-    BindingFlags_OptionalParamBinding = 262144,
-    BindingFlags_IgnoreReturn = 16777216
-} BindingFlags;
-
 typedef struct _Assembly {
     AssemblyVtbl* lpVtbl;
 } Assembly;
@@ -363,20 +290,6 @@ typedef struct _MethodInfo {
     MethodInfoVtbl* lpVtbl;
 } MethodInfo;
 
-
-
-#define APPDOMAIN_SECURITY_DEFAULT 0
-#define APPDOMAIN_SECURITY_SANDBOXED 0x1
-#define APPDOMAIN_SECURITY_FORBID_CROSSAD_REVERSE_PINVOKE 0x2
-#define APPDOMAIN_IGNORE_UNHANDLED_EXCEPTIONS 0x4
-#define APPDOMAIN_FORCE_TRIVIAL_WAIT_OPERATIONS 0x8
-#define APPDOMAIN_ENABLE_PINVOKE_AND_CLASSIC_COMINTEROP 0x10
-#define APPDOMAIN_SET_TEST_KEY 0x20
-#define APPDOMAIN_ENABLE_PLATFORM_SPECIFIC_APPS 0x40
-#define APPDOMAIN_ENABLE_ASSEMBLY_LOADFILE 0x80
-#define APPDOMAIN_DISABLE_TRANSPARENCY_ENFORCEMENT 0x100
-
-
 // Rc4EncryptionViaSystemFunc032
 // Definition of the USTRING structure used for data encryption / decryption
 typedef struct {
@@ -411,12 +324,6 @@ static GUID xIID_IAssemblyName = { 0xB42B6AAC, 0x317E, 0x34D5, {0x9F, 0xA9, 0x09
 #define x64_MOV_INSTRUCTION_OPCODE			0xB8		// 'mov'	- instruction opcode
 
 #define	x64_SYSCALL_STUB_SIZE				0x20		// size of a syscall stub is 32
-
-// Amsi Patching
-#define x64_INT3_INSTRUCTION_OPCODE			0xCC		// 'int3'				- instruction opcode
-#define x64_JE_INSTRUCTION_OPCODE			0x74		// 'jump if equal'		- instruction opcode
-#define x64_JNE_INSTRUCTION_OPCODE			0x75		// 'jump if not equal'	- instruction opcode
-#define x64_MOV_INSTRUCTION_OPCODE			0xB8		// 'move'				- instruction opcode
 
 // https://ntdoc.m417z.com/
 typedef NTSYSAPI NTSTATUS(NTAPI* _NtProtectVirtualMemory)(
