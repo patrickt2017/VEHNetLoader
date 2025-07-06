@@ -326,6 +326,26 @@ static GUID xIID_IAssemblyName = { 0xB42B6AAC, 0x317E, 0x34D5, {0x9F, 0xA9, 0x09
 #define	x64_SYSCALL_STUB_SIZE				0x20		// size of a syscall stub is 32
 
 // https://ntdoc.m417z.com/
+// Native API definitions
+typedef enum _MEMORY_INFORMATION_CLASS {
+    MemoryBasicInformation, // q: MEMORY_BASIC_INFORMATION
+    MemoryWorkingSetInformation, // q: MEMORY_WORKING_SET_INFORMATION
+    MemoryMappedFilenameInformation, // q: UNICODE_STRING
+    MemoryRegionInformation, // q: MEMORY_REGION_INFORMATION
+    MemoryWorkingSetExInformation, // q: MEMORY_WORKING_SET_EX_INFORMATION // since VISTA
+    MemorySharedCommitInformation, // q: MEMORY_SHARED_COMMIT_INFORMATION // since WIN8
+    MemoryImageInformation, // q: MEMORY_IMAGE_INFORMATION
+    MemoryRegionInformationEx, // MEMORY_REGION_INFORMATION
+    MemoryPrivilegedBasicInformation, // MEMORY_BASIC_INFORMATION
+    MemoryEnclaveImageInformation, // MEMORY_ENCLAVE_IMAGE_INFORMATION // since REDSTONE3
+    MemoryBasicInformationCapped, // 10
+    MemoryPhysicalContiguityInformation, // MEMORY_PHYSICAL_CONTIGUITY_INFORMATION // since 20H1
+    MemoryBadInformation, // since WIN11
+    MemoryBadInformationAllProcesses, // since 22H1
+    MemoryImageExtensionInformation, // MEMORY_IMAGE_EXTENSION_INFORMATION // since 24H2
+    MaxMemoryInfoClass
+} MEMORY_INFORMATION_CLASS;
+
 typedef NTSYSAPI NTSTATUS(NTAPI* _NtProtectVirtualMemory)(
     IN HANDLE ProcessHandle,
     IN OUT PVOID* BaseAddress,
@@ -339,3 +359,11 @@ typedef NTSYSAPI NTSTATUS(NTAPI* _NtWriteVirtualMemory)(
     IN PVOID Buffer,
     IN SIZE_T NumberOfBytesToWrite,
     OUT PSIZE_T NumberOfBytesWritten OPTIONAL);
+
+typedef NTSYSAPI NTSTATUS(NTAPI* _NtQueryVirtualMemory)(
+    IN HANDLE ProcessHandle,
+    IN PVOID BaseAddress OPTIONAL,
+    IN MEMORY_INFORMATION_CLASS MemoryInformationClass,
+    OUT PVOID MemoryInformation,
+    IN SIZE_T MemoryInformationLength,
+    OUT PSIZE_T ReturnLength OPTIONAL);

